@@ -1,22 +1,57 @@
-import logo from './logo.svg';
+
+import React, { useEffect, useState } from 'react'
 import './App.css';
 
+const waitTron = () => {
+  return new Promise((resolve, reject) => {
+    let attempts = 0, maxAttempts = 100;
+    const checkTron = () => {
+      if(window.tronWeb){
+        resolve(true);
+        return;
+      }
+      attempts++;
+      if(attempts >= maxAttempts){
+        reject(false);
+        return;
+      }
+      setTimeout(checkTron, 100);
+    };
+    checkTron();
+  })
+};
+
+const initContract = async() => {
+  let tronExists = await waitTron();
+  if(!tronExists){
+    alert('Please login into TronLink extension!');
+    return null;
+  }
+  const contractHEXAddress = 'TBm2j7mnhcWt6YP2SUqmejDvSCC3aVHhHX';
+  let contract = await window.tronWeb.contract().at(contractHEXAddress);
+  window.tronWeb.trx.getBalance("TDkSEfajmqX42Yt35WiqdyHmxBQiVRtqtv").then(result => console.log(result))
+  window.tronWeb.trx.getBandwidth("TDkSEfajmqX42Yt35WiqdyHmxBQiVRtqtv", (error, bandwidth) => {
+    if(error)
+      return console.log("Error!!!!!!!!!! " + error);
+    console.log("Bandwidth: " + bandwidth);
+  });
+
+
+  return contract;
+}
+
 function App() {
+  const [contract, setContract] = useState(null);
+  useEffect(()=>{
+    initContract().then(contract=>{setContract(contract)});
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {console.log(contract)}
+        {contract && window.tronWeb.address.fromHex(contract.address)}
+        <br/>
+        {console.log(window.tronWeb.isConnected())}
       </header>
     </div>
   );
