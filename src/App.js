@@ -49,9 +49,13 @@ function App() {
     <div className="App">
       <header className="App-header">
         {console.log(contract)}
-        {contract && window.tronWeb.address.fromHex(contract.address)}
+        {!contract && "No contract is deployed"}
+        {contract && "Contract address: " + window.tronWeb.address.fromHex(contract.address)}
         <br/>
-        {console.log(window.tronWeb.isConnected())}
+        {window.tronLinkInitialData && "Tronlink is installed"}
+        <br/>
+        {window.tronLinkInitialData?window.tronLinkInitialData.address && window.tronLinkInitialData.address:"Not installed"}
+        <br/>
       </header>
     </div>
   );
